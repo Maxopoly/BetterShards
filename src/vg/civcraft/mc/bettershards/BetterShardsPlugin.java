@@ -45,7 +45,6 @@ import vg.civcraft.mc.bettershards.misc.CustomWorldNBTStorage;
 import vg.civcraft.mc.bettershards.misc.Grid;
 import vg.civcraft.mc.bettershards.misc.PlayerStillDeadException;
 import vg.civcraft.mc.bettershards.misc.RandomSpawn;
-import vg.civcraft.mc.bettershards.portal.Portal;
 import vg.civcraft.mc.civmodcore.ACivMod;
 import vg.civcraft.mc.civmodcore.Config;
 import vg.civcraft.mc.civmodcore.annotations.CivConfig;
