@@ -87,7 +87,7 @@
     <dependency>
       <groupId>vg.civcraft.mc.mercury</groupId>
       <artifactId>Mercury</artifactId>
-      <version>1.2.16</version>
+      <version>1.2.19</version>
       <scope>provided</scope>
     </dependency>
 <!--     <dependency>
@@ -117,7 +117,7 @@
     </repository>
     <repository>
       <id>civcraft-repo</id>
-      <url>http://build.civcraft.co/plugin/repository/everything/</url>
+      <url>https://build.devotedmc.com/plugin/repository/everything/</url>
     </repository>
   </repositories>
 </project>
