@@ -25,7 +25,7 @@
 
 	<distributionManagement>
 		<repository>
-			<id>civcraft-repo</id>
+			<id>devoted-repo</id>
 			<url>http://build.devotedmc.com/job/BetterShards-master/</url>
 		</repository>
 	</distributionManagement>
