@@ -27,8 +27,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import vg.civcraft.mc.bettershards.BetterShardsPlugin;
 import vg.civcraft.mc.bettershards.database.DatabaseManager;
-import vg.civcraft.mc.civmodcore.annotations.CivConfig;
-import vg.civcraft.mc.civmodcore.annotations.CivConfigType;
 import net.minecraft.server.v1_10_R1.DataConverterManager;
 import net.minecraft.server.v1_10_R1.EntityHuman;
 import net.minecraft.server.v1_10_R1.EntityPlayer;
@@ -352,9 +350,8 @@ public class CustomWorldNBTStorage extends ServerNBTManager {
 		}
 	}
 	
-	@CivConfig(name = "import_playerdata", def = "false", type = CivConfigType.Bool)
 	public static void uploadExistingPlayers() {
-		if (!BetterShardsPlugin.getInstance().GetConfig().get("import_playerdata").getBool()) {
+		if (!BetterShardsPlugin.getInstance().getConfig().getBoolean("import_playerdata")) {
 			return;
 		}
 		for (World w: Bukkit.getWorlds()) {

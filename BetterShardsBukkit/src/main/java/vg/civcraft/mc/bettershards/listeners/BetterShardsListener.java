@@ -15,6 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -56,16 +57,13 @@ import vg.civcraft.mc.bettershards.misc.InventoryIdentifier;
 import vg.civcraft.mc.bettershards.misc.PlayerStillDeadException;
 import vg.civcraft.mc.bettershards.misc.TeleportInfo;
 import vg.civcraft.mc.bettershards.portal.Portal;
-import vg.civcraft.mc.civmodcore.Config;
-import vg.civcraft.mc.civmodcore.annotations.CivConfig;
-import vg.civcraft.mc.civmodcore.annotations.CivConfigType;
 import vg.civcraft.mc.mercury.MercuryAPI;
 
 public class BetterShardsListener implements Listener{
 	
 	private BetterShardsPlugin plugin;
 	private DatabaseManager db;
-	private Config config;
+	private FileConfiguration config;
 	private PortalsManager pm;
 	private CustomWorldNBTStorage st;
 	private RandomSpawnManager rs;
@@ -74,7 +72,7 @@ public class BetterShardsListener implements Listener{
 		plugin = BetterShardsPlugin.getInstance();
 		db = BetterShardsPlugin.getDatabaseManager();
 		pm = BetterShardsPlugin.getPortalManager();
-		config = plugin.GetConfig();
+		config = plugin.getConfig();
 		rs = BetterShardsPlugin.getRandomSpawn();
 		Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
@@ -119,7 +117,6 @@ public class BetterShardsListener implements Listener{
 		// by our CustomWorldNBTStorage class it doesn't have to wait and server won't lock.
 	}
 
-	@CivConfig(name = "lobby", def = "false", type = CivConfigType.Bool)
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void playerJoinEvent(PlayerJoinEvent event){
 		// Defer to next tick so join is fully complete before we unlock
@@ -131,7 +128,7 @@ public class BetterShardsListener implements Listener{
 				BetterShardsPlugin.getTransitManager().notifySuccessfullArrival(player);
 			}
 		});
-		if (config.get("lobby").getBool()) {
+		if (config.getBoolean("lobby")) {
 		    World w = BetterShardsPlugin.getRandomSpawn().getWorld();
 		    event.getPlayer().teleport(w.getSpawnLocation());
 		    return;
@@ -150,8 +147,9 @@ public class BetterShardsListener implements Listener{
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void playerJoinedLobbyServer(AsyncPlayerPreLoginEvent event) {
-		if (!config.get("lobby").getBool())
+		if (!config.getBoolean("lobby")) {
 			return;
+		}
 		UUID uuid = event.getUniqueId();
 		if (st == null){ // Small race condition if someone logs on as soon as the server starts.
 			plugin.getLogger().log(Level.INFO, "Player logged on before async process was ready, skipping.");
@@ -246,10 +244,9 @@ public class BetterShardsListener implements Listener{
         }
 	}
 	
-	@CivConfig(name = "allow_portals_build", def = "false", type = CivConfigType.Bool)
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void portalCreateEvent(PlayerInteractEvent event){
-		if (!config.get("allow_portals_build").getBool())
+		if (!config.getBoolean("allow_portals_build"))
 			return;
 		Player p = event.getPlayer();
 		Action a = event.getAction();
@@ -280,8 +277,9 @@ public class BetterShardsListener implements Listener{
 	
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void playerRespawnEvent(PlayerRespawnEvent event) {
-		if (config.get("lobby").getBool())
+		if (config.getBoolean("lobby")) {
 			return;
+		}
 		final Player p = event.getPlayer();
 		UUID uuid = p.getUniqueId();
 		final BedLocation bed = BetterShardsPlugin.getBedManager().getBed(uuid);
@@ -322,7 +320,7 @@ public class BetterShardsListener implements Listener{
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void bedBreak(BlockBreakEvent event) {
-		if (config.get("lobby").getBool()) {
+		if (config.getBoolean("lobby")) {
 			return;
 		}
 		bedBreak(event.getBlock());
@@ -330,8 +328,9 @@ public class BetterShardsListener implements Listener{
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void bedExplode(EntityExplodeEvent e) {
-		if (config.get("lobby").getBool())
+		if (config.getBoolean("lobby")) {
 			return;
+		}
 		for(Block b : e.blockList()) {
 			bedBreak(b);
 		}
@@ -339,8 +338,9 @@ public class BetterShardsListener implements Listener{
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void pistonDestroyBed(BlockPistonExtendEvent e) {
-		if (config.get("lobby").getBool()) 
+		if (config.getBoolean("lobby")) {
 			return;
+		}
 		bedBreak(e.getBlock());
 		for(Block b : e.getBlocks()) {
 			bedBreak(b);
@@ -349,8 +349,9 @@ public class BetterShardsListener implements Listener{
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void bedBreakExplosion(BlockExplodeEvent event) {
-		if (config.get("lobby").getBool())
+		if (config.getBoolean("lobby")) {
 			return;
+		}
 		for (Block b : event.blockList()) {
 			bedBreak(b);
 		}
@@ -392,9 +393,9 @@ public class BetterShardsListener implements Listener{
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void playerSleepInBed(PlayerInteractEvent event) {
-		if (config.get("lobby").getBool())
+		if (config.getBoolean("lobby")) {
 			return;
-		
+		}
 		if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !event.getClickedBlock().getType().equals(Material.BED_BLOCK)) {
 			return;
 		}

@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import vg.civcraft.mc.bettershards.BetterShardsAPI;
@@ -18,10 +19,6 @@ import vg.civcraft.mc.bettershards.database.DatabaseManager;
 import vg.civcraft.mc.bettershards.events.PlayerChangeServerReason;
 import vg.civcraft.mc.bettershards.external.MercuryManager;
 import vg.civcraft.mc.bettershards.misc.PlayerStillDeadException;
-import vg.civcraft.mc.civmodcore.Config;
-import vg.civcraft.mc.civmodcore.annotations.CivConfig;
-import vg.civcraft.mc.civmodcore.annotations.CivConfigType;
-import vg.civcraft.mc.civmodcore.annotations.CivConfigs;
 import vg.civcraft.mc.mercury.MercuryAPI;
 
 public class RandomSpawnManager {
@@ -33,15 +30,15 @@ public class RandomSpawnManager {
 
 	
 	public RandomSpawnManager() {
-		Config config = BetterShardsPlugin.getInstance().GetConfig();
-		this.spawnRange = config.get("randomspawn.range").getInt();
-		String worldName = config.get("randomspawn.spawnworld").getString();
+		FileConfiguration config = BetterShardsPlugin.getInstance().getConfig();
+		this.spawnRange = config.getInt("randomspawn.range");
+		String worldName = config.getString("randomspawn.spawnworld");
 		this.w = BetterShardsPlugin.getInstance().getServer().getWorld(worldName);
 		if (this.w == null) {
 			BetterShardsPlugin.getInstance().severe("Could not find world " + worldName + " for random spawning. Defaulting to standard world");
 			this.w = Bukkit.getWorlds().get(0);
 		}
-		List <String> ignoreMats = config.get("randomspawn.ignoreMaterials").getStringList();
+		List <String> ignoreMats = config.getStringList("randomspawn.ignoreMaterials");
 		this.ignoreMaterials = new ArrayList<Material>();
 		for(String ign : ignoreMats) {
 		    try {
@@ -62,11 +59,6 @@ public class RandomSpawnManager {
 	 * 
 	 * @param p Player who just died
 	 */
-	@CivConfigs({
-		@CivConfig(name = "randomspawn.range", def = "1000", type = CivConfigType.Int),
-		@CivConfig(name = "randomspawn.spawnworld", def = "world", type = CivConfigType.String),
-		@CivConfig(name = "randomspawn.ignoreMaterials", type = CivConfigType.String_List)
-	})
 	public void handleDeath(Player p) {
 		List<String> servers = getAllowedServers();
 		if (servers.isEmpty()) {
