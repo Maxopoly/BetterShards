@@ -58,7 +58,7 @@ public class WorldBorderPortal extends Portal {
 		//= wbRange * arcLength
 		double blocksInPortal = arcLength * wbRange;
 		this.particleIncrement = 1.0 / blocksInPortal;
-		List <String> ignoreMats = BetterShardsPlugin.getInstance().GetConfig().get("randomspawn.ignoreMaterials").getStringList();
+		List <String> ignoreMats = BetterShardsPlugin.getInstance().getConfig().getStringList("randomspawn.ignoreMaterials");
 		if (ignoreMaterials == null) {
 			ignoreMaterials = new ArrayList<Material>();
 			for(String ign : ignoreMats) {

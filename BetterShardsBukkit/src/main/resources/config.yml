@@ -1,5 +1,28 @@
 mysql:
+ username: bukkit
+ dbname: bukkit
+ password: ''
+ port: 3306
+ host: localhost
  poolsize: 5
  connection_timeout: 10000
  idle_timeout: 600000
  max_lifetime: 7200000
+ 
+locks:
+  cleanup_minutes: 1
+  cleanup: true
+  interval: 1200
+  freshness_period: 30000
+  show_culprit: false
+  
+randomspawn:
+  range: 1000
+  spawnworld: world
+  ignoreMaterials:
+   - LAVA
+   - STATIONARY_LAVA
+  
+lobby: false
+allow_portals_build: false
+import_playerdata: false

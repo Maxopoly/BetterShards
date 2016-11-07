@@ -18,10 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -30,6 +27,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -43,17 +41,13 @@ import vg.civcraft.mc.bettershards.portal.Portal;
 import vg.civcraft.mc.bettershards.portal.portals.CircularPortal;
 import vg.civcraft.mc.bettershards.portal.portals.CuboidPortal;
 import vg.civcraft.mc.bettershards.portal.portals.WorldBorderPortal;
-import vg.civcraft.mc.civmodcore.Config;
-import vg.civcraft.mc.civmodcore.annotations.CivConfig;
-import vg.civcraft.mc.civmodcore.annotations.CivConfigType;
-import vg.civcraft.mc.civmodcore.annotations.CivConfigs;
 import vg.civcraft.mc.civmodcore.dao.ManagedDatasource;
 import vg.civcraft.mc.mercury.MercuryAPI;
 
 public class DatabaseManager {
 
 	private BetterShardsPlugin plugin = BetterShardsPlugin.getInstance();
-	private Config config;
+	private FileConfiguration config;
 	private ManagedDatasource db;
 	
 	private Map<UUID, Map<InventoryIdentifier, byte[]>> invCache = new HashMap<UUID, Map<InventoryIdentifier, byte[]>>();
@@ -117,7 +111,7 @@ public class DatabaseManager {
 	 * Next, optionally sets up cleanup if configured to do so.
 	 */
 	public DatabaseManager(){
-		config = plugin.GetConfig();
+		config = plugin.getConfig();
 		logger = plugin.getLogger();
 		setupDatabase();
 		try {
@@ -138,27 +132,16 @@ public class DatabaseManager {
 		setupCleanup();
 	}
 	
-	@CivConfigs({
-		@CivConfig(name = "mysql.host", def = "localhost", type = CivConfigType.String),
-		@CivConfig(name = "mysql.port", def = "3306", type = CivConfigType.Int),
-		@CivConfig(name = "mysql.username", type = CivConfigType.String),
-		@CivConfig(name = "mysql.password", type = CivConfigType.String),
-		@CivConfig(name = "mysql.dbname", def = "BetterShardsDB", type = CivConfigType.String),
-		@CivConfig(name = "mysql.poolsize", def = "10", type = CivConfigType.Int),
-		@CivConfig(name = "mysql.connection_timeout", def = "10000", type = CivConfigType.Long),
-		@CivConfig(name = "mysql.idle_timeout", def = "600000", type = CivConfigType.Long),
-		@CivConfig(name = "mysql.max_lifetime", def = "7200000", type = CivConfigType.Long)
-	})
 	private void setupDatabase(){
-		String username = config.get("mysql.username").getString();
-		String host = config.get("mysql.host").getString();
-		int port = config.get("mysql.port").getInt();
-		String password = config.get("mysql.password").getString();
-		String dbname = config.get("mysql.dbname").getString();
-		int poolsize = config.get("mysql.poolsize").getInt();
-		long connectionTimeout = config.get("mysql.connection_timeout").getLong();
-		long idleTimeout = config.get("mysql.idle_timeout").getLong();
-		long maxLifetime = config.get("mysql.max_lifetime").getLong();
+		String username = config.getString("mysql.username");
+		String host = config.getString("mysql.host");
+		int port = config.getInt("mysql.port");
+		String password = config.getString("mysql.password");
+		String dbname = config.getString("mysql.dbname");
+		int poolsize = config.getInt("mysql.poolsize");
+		long connectionTimeout = config.getLong("mysql.connection_timeout");
+		long idleTimeout = config.getLong("mysql.idle_timeout");
+		long maxLifetime = config.getLong("mysql.max_lifetime");
 		this.db = new ManagedDatasource(plugin, username, password, host, port, dbname, poolsize, connectionTimeout, idleTimeout, maxLifetime);
 	}
 	
@@ -223,21 +206,13 @@ public class DatabaseManager {
 					+ "PRIMARY KEY (uuid, inv_id));");
 	}
 	
-	@CivConfigs({
-		@CivConfig(name = "locks.cleanup_minutes", def = "1", type = CivConfigType.Int),
-	})
 	private void prepareLocalStatements(){
-		cleanupLocks = "DELETE FROM playerDataLock WHERE last_upd <= TIMESTAMPADD(MINUTE, -" + config.get("locks.cleanup_minutes").getInt() + ", NOW());";
+		cleanupLocks = "DELETE FROM playerDataLock WHERE last_upd <= TIMESTAMPADD(MINUTE, -" + config.getInt("locks.cleanup_minutes") + ", NOW());";
 	}
 
-	@CivConfigs({
-		@CivConfig(name = "locks.cleanup", def = "true", type = CivConfigType.Bool),
-		@CivConfig(name = "locks.interval", def = "1200", type = CivConfigType.Long),
-		@CivConfig(name = "cache.freshness_period", def = "30000", type = CivConfigType.Long)
-	})
 	private void setupCleanup() {
-		this.invCacheTimeout = config.get("cache.freshness_period").getLong();
-		if (config.get("locks.cleanup").getBool()) {  // no forever locks
+		this.invCacheTimeout = config.getLong("cache.freshness_period");
+		if (config.getBoolean("locks.cleanup")) {  // no forever locks
 			this.lockCleanup = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
 
 				@Override
@@ -250,7 +225,7 @@ public class DatabaseManager {
 					}
 				}
 				
-			}, 20l, config.get("locks.interval").getLong());
+			}, 20l, config.getLong("locks.interval"));
 		}
 	}
 
@@ -430,9 +405,6 @@ public class DatabaseManager {
 		}
 	}
 	
-	@CivConfigs({
-		@CivConfig(name="locks.show_culprit", def="false", type = CivConfigType.Bool)
-	})
 	public boolean getPlayerLock(UUID uuid, InventoryIdentifier id) {
 		try (Connection connection = db.getConnection();
 				PreparedStatement getLock = connection.prepareStatement(DatabaseManager.getLock);) {
@@ -442,7 +414,7 @@ public class DatabaseManager {
 			return true;
 		} catch (SQLException nolockforyou) {
 			// TODO ideally only return false for known duplicate key failure error; otherwise raise holy hell.
-			if (config.get("locks.show_culprit").getBool()) {
+			if (config.getBoolean("locks.show_culprit")) {
 				// Who is responsible for this expected travesty
 				logger.log(Level.WARNING, "Someone wanted a save-lock but was late to the party: ", nolockforyou);
 			}
