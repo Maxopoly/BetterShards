@@ -73,21 +73,21 @@
     <dependency>
       <groupId>net.md-5</groupId>
       <artifactId>bungeecord-protocol</artifactId>
-      <version>1.10-SNAPSHOT</version>
+      <version>1.11-SNAPSHOT</version>
       <scope>provided</scope>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>net.md-5</groupId>
       <artifactId>bungeecord-api</artifactId>
-      <version>1.10-SNAPSHOT</version>
+      <version>1.11-SNAPSHOT</version>
       <scope>provided</scope>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>vg.civcraft.mc.mercury</groupId>
       <artifactId>Mercury</artifactId>
-      <version>1.2.19</version>
+      <version>1.2.20</version>
       <scope>provided</scope>
     </dependency>
 <!--     <dependency>
